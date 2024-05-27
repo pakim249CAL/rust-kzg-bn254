@@ -230,6 +230,7 @@ pub fn read_g2_point_from_bytes_be(g2_bytes_be: &Vec<u8>) -> Result<G2Affine, &s
 
     let mut y_sqrt = added_result.sqrt().ok_or("no square root found").unwrap();
 
+    #[allow(dead_code)]
     let mut lexicographical_check_result = false;
 
     if y_sqrt.c1.0.is_zero() {

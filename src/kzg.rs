@@ -7,13 +7,13 @@ use ark_bn254::{Bn254, Fr, G1Projective, G2Affine};
 use ark_ec::pairing::Pairing;
 use ark_ec::{AffineRepr, CurveGroup, VariableBaseMSM};
 use ark_poly::{EvaluationDomain, GeneralEvaluationDomain};
-use ark_serialize::CanonicalDeserialize;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::ops::{Div, Mul};
 use ark_std::str::FromStr;
 use ark_std::{One, Zero};
 use num_traits::ToPrimitive;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct Kzg {
     pub g1: Vec<G1Affine>,
     pub g2: Vec<G2Affine>,
@@ -22,7 +22,7 @@ pub struct Kzg {
     pub expanded_roots_of_unity: Vec<Fr>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, CanonicalSerialize, CanonicalDeserialize)]
 pub struct Params {
     chunk_length: u64,
     num_chunks: u64,
@@ -30,46 +30,31 @@ pub struct Params {
     completed_setup: bool,
 }
 
-const G1_MAINNET_BYTES: &[u8; 4_194_312] = include_bytes!("test-files/g1_serialized_mainnet");
-const G2_MAINNET_BYTES: &[u8; 1_800] = include_bytes!("test-files/g2_serialized_mainnet");
-const G1_TEST_BYTES: &[u8; 96_008] = include_bytes!("test-files/g1_serialized_test");
-const G2_TEST_BYTES: &[u8; 192_008] = include_bytes!("test-files/g2_serialized_test");
+const KZG_MAINNET_BYTES: &[u8; 4_196_153] = include_bytes!("test-files/kzg_serialized_mainnet");
+
+const KZG_TEST_BYTES: &[u8; 288_057] = include_bytes!("test-files/kzg_serialized_test");
 
 impl Kzg {
     pub fn setup(test: bool) -> Result<Self, KzgError> {
         if test {
-            let g1: Vec<G1Affine> =
-                CanonicalDeserialize::deserialize_compressed(G1_TEST_BYTES.as_slice()).unwrap();
-            let g2: Vec<G2Affine> =
-                CanonicalDeserialize::deserialize_compressed(G2_TEST_BYTES.as_slice()).unwrap();
+            let kzg: Kzg =
+                CanonicalDeserialize::deserialize_compressed(KZG_TEST_BYTES.as_slice()).unwrap();
             Ok(Self {
-                g1,
-                g2,
-                params: Params {
-                    chunk_length: 0,
-                    num_chunks: 0,
-                    max_fft_width: 0,
-                    completed_setup: false,
-                },
-                srs_order: 3000,
-                expanded_roots_of_unity: vec![],
+                g1: kzg.g1,
+                g2: kzg.g2,
+                params: kzg.params,
+                srs_order: kzg.srs_order,
+                expanded_roots_of_unity: kzg.expanded_roots_of_unity,
             })
         } else {
-            let g1: Vec<G1Affine> =
-                CanonicalDeserialize::deserialize_compressed(G1_MAINNET_BYTES.as_slice()).unwrap();
-            let g2: Vec<G2Affine> =
-                CanonicalDeserialize::deserialize_compressed(G2_MAINNET_BYTES.as_slice()).unwrap();
+            let kzg: Kzg =
+                CanonicalDeserialize::deserialize_compressed(KZG_MAINNET_BYTES.as_slice()).unwrap();
             Ok(Self {
-                g1,
-                g2,
-                params: Params {
-                    chunk_length: 0,
-                    num_chunks: 0,
-                    max_fft_width: 0,
-                    completed_setup: false,
-                },
-                srs_order: 268435456,
-                expanded_roots_of_unity: vec![],
+                g1: kzg.g1,
+                g2: kzg.g2,
+                params: kzg.params,
+                srs_order: kzg.srs_order,
+                expanded_roots_of_unity: kzg.expanded_roots_of_unity,
             })
         }
     }
