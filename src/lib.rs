@@ -6,3 +6,4 @@ pub mod helpers;
 pub mod kzg;
 pub mod polynomial;
 mod traits;
+mod generated;
