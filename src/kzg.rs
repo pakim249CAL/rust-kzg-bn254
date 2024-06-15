@@ -12,10 +12,11 @@ use ark_std::ops::{Div, Mul};
 use ark_std::str::FromStr;
 use ark_std::{One, Zero};
 use num_traits::ToPrimitive;
+use crate::generated::G1;
 
-#[derive(Debug, PartialEq, Clone, CanonicalSerialize, CanonicalDeserialize)]
+#[derive(Debug, PartialEq, Clone, CanonicalSerialize)]
 pub struct Kzg {
-    pub g1: Vec<G1Affine>,
+    pub g1: &'static[G1Affine],
     pub g2: Vec<G2Affine>,
     pub params: Params,
     pub srs_order: u64,
@@ -37,25 +38,21 @@ const KZG_TEST_BYTES: &[u8; 288_057] = include_bytes!("test-files/kzg_serialized
 impl Kzg {
     pub fn setup(test: bool) -> Result<Self, KzgError> {
         if test {
-            let kzg: Kzg =
-                CanonicalDeserialize::deserialize_compressed(KZG_TEST_BYTES.as_slice()).unwrap();
             Ok(Self {
-                g1: kzg.g1,
-                g2: kzg.g2,
-                params: kzg.params,
-                srs_order: kzg.srs_order,
-                expanded_roots_of_unity: kzg.expanded_roots_of_unity,
+                g1: G1,
+                g2: vec![],
+                params: Params {
+                    chunk_length: 0,
+                    num_chunks: 0,
+                    max_fft_width: 0,
+                    completed_setup: true,
+                
+                },
+                srs_order: 3000,
+                expanded_roots_of_unity: vec![],
             })
         } else {
-            let kzg: Kzg =
-                CanonicalDeserialize::deserialize_compressed(KZG_MAINNET_BYTES.as_slice()).unwrap();
-            Ok(Self {
-                g1: kzg.g1,
-                g2: kzg.g2,
-                params: kzg.params,
-                srs_order: kzg.srs_order,
-                expanded_roots_of_unity: kzg.expanded_roots_of_unity,
-            })
+            Err(KzgError::GenericError("mainnet setup not implemented".to_string()))
         }
     }
 
