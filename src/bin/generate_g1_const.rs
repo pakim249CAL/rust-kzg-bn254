@@ -4,12 +4,12 @@ use std::fs::File;
 use std::io::{Write, BufWriter};
 use std::writeln;
 
-const G1_MAINNET_BYTES: &[u8; 8_388_616] = include_bytes!("src/test-files/g1_mainnet.point");
-const G1_TEST_BYTES: &[u8; 192_008] = include_bytes!("src/test-files/g1_test.point");
+const G1_MAINNET_BYTES: &[u8; 8_388_616] = include_bytes!("../test-files/g1_mainnet.point");
+const G1_TEST_BYTES: &[u8; 192_008] = include_bytes!("../test-files/g1_test.point");
 
 fn main() {
     let g1: Vec<G1Affine> = CanonicalDeserialize::deserialize_uncompressed_unchecked(G1_TEST_BYTES.as_slice()).unwrap();
-    let file = File::create("src/generated/g1_const.rs").unwrap();
+    let file = File::create("../generated/g1_const.rs").unwrap();
     let mut file = BufWriter::new(file);
 
     writeln!(
