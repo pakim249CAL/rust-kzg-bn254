@@ -198,18 +198,29 @@ impl Kzg {
         }
 
         // Perform the multi-exponentiation
+        println!("cycle-tracker-start: ifft");
         let bases = self.g1_ifft(polynomial.len()).unwrap();
-        match G1Projective::msm(&bases, &polynomial.to_vec()) {
-            Ok(res) => Ok(res.into_affine()),
+        println!("cycle-tracker-end: ifft");
+
+        
+        println!("cycle-tracker-start: msm");
+        let result = G1Projective::msm(&bases, &polynomial.to_vec());
+        println!("cycle-tracker-end: msm");
+        match result {
+            Ok(res) => {
+                Ok(res.into_affine())
+            },
             Err(err) => Err(KzgError::CommitError(err.to_string())),
         }
     }
 
     /// 4844 compatible helper function
     pub fn blob_to_kzg_commitment(&self, blob: &Blob) -> Result<G1Affine, KzgError> {
+        println!("cycle-tracker-start: blob-to-polynomial");
         let polynomial = blob
             .to_polynomial()
             .map_err(|err| KzgError::SerializationError(err.to_string()))?;
+        println!("cycle-tracker-end: blob-to-polynomial");
         let commitment = self.commit(&polynomial)?;
         Ok(commitment)
     }
